@@ -47,8 +47,10 @@ const render = function () {
 };
 
 const handleNewItemSubmit = function () {
-  const newItemName = $('.js-shopping-list-entry').val();
-  $('.js-shopping-list-entry').val('');
+  $('.js-shopping-list-entry').submit(fucntion(event)){
+    event.preventDefault(); 
+    const newItemName = $('.js-shopping-list-entry').val();
+    $('.js-shopping-list-entry').val('');
   api.createItem(newItemName)
     .then(res => res.json())
     .then((newItem) => {
