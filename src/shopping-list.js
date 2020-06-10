@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import item from './item';
+
 import store from './store';
 import api from './api';
 
@@ -32,6 +32,31 @@ const generateShoppingItemsString = function (shoppingList) {
   return items.join('');
 };
 
+const generateError  = function (message) {
+  return `
+    <section class="error-content">
+    <button id="cancel-error">X</button>
+    <p>${message}</p>
+    </section>
+  `;
+};
+
+const renderError = function () {
+  if (store.error) {
+    const el = generateError(store.error);
+    $('.error-container').html(el);
+  }  else{
+    $('.error-container').empty();
+  }
+};
+
+const handleCloseError = function () {
+  $('.error-container').on('click','#cancel-error',() => {
+    store.setError(null);
+    renderError();
+  });
+};
+
 const render = function () {
   // Filter item list if store prop is true by item.checked === false
   let items = [...store.items];
@@ -47,12 +72,12 @@ const render = function () {
 };
 
 const handleNewItemSubmit = function () {
-  $('.js-shopping-list-entry').submit(function(event)){
-    event.preventDefault(); 
+  $('#js-shopping-list').submit(funciton (event) {
+    event.preventDefault();
     const newItemName = $('.js-shopping-list-entry').val();
     $('.js-shopping-list-entry').val('');
-  api.createItem(newItemName)
-    .then(res => res.json())
+    api.createItem(newItemName)
+      .then((newItem) => res.json())
     .then((newItem) => {
       store.addItem(newItem);
       render();
@@ -67,13 +92,18 @@ const getItemIdFromElement = function (item) {
 
 const handleDeleteItemClicked = function () {
   // like in `handleItemCheckClicked`, we use event delegation
+
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
-    // get the index of the item in store.items
+
+
     const id = getItemIdFromElement(event.currentTarget);
-    // delete the item
-    store.findAndDelete(id);
-    // render the updated shopping list
-    render();
+
+    api.deleteItem(id)
+      .then(res=>res.json())
+      .then(()=>{
+        store.findAndDelete(id);
+        render();
+      });
   });
 };
 
@@ -82,7 +112,10 @@ const handleEditShoppingItemSubmit = function () {
     event.preventDefault();
     const id = getItemIdFromElement(event.currentTarget);
     const itemName = $(event.currentTarget).find('.shopping-item').val();
-    store.findAndUpdateName(id, itemName);
+    api.updateItem(id,{name:itemName})
+      .then(()=>{
+        store.findAndUpdate(id,{name:itemName});
+      });
     render();
   });
 };
@@ -90,8 +123,13 @@ const handleEditShoppingItemSubmit = function () {
 const handleItemCheckClicked = function () {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     const id = getItemIdFromElement(event.currentTarget);
-    store.findAndToggleChecked(id);
-    render();
+    const item = store.findById(id);
+
+    api.updateItem(id,{checked: !item.checked})
+      .then(()=>{
+        store.findAndUpdate(id,{checked: !item.checked});
+        render();
+      });
   });
 };
 
