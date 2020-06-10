@@ -47,7 +47,7 @@ const render = function () {
 };
 
 const handleNewItemSubmit = function () {
-  $('.js-shopping-list-entry').submit(fucntion(event)){
+  $('.js-shopping-list-entry').submit(function(event)){
     event.preventDefault(); 
     const newItemName = $('.js-shopping-list-entry').val();
     $('.js-shopping-list-entry').val('');
