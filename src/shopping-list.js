@@ -1,4 +1,5 @@
 import $ from 'jquery';
+
 import store from './store';
 import api from './api';
 
@@ -7,7 +8,7 @@ const generateItemElement = function (item) {
   if (!item.checked) {
     itemTitle = `
       <form class="js-edit-item">
-        <input class="shopping-item" type="text" value="${item.name}" required>
+        <input class="shopping-item" type="text" value="${item.name}" required />
       </form>
     `;
   }
@@ -31,26 +32,26 @@ const generateShoppingItemsString = function (shoppingList) {
   return items.join('');
 };
 
-const generateError  = function (message) {
+const generateError = function (message) {
   return `
-    <section class="error-content">
-    <button id="cancel-error">X</button>
-    <p>${message}</p>
-    </section>
-  `;
+      <section class="error-content">
+        <button id="cancel-error">X</button>
+        <p>${message}</p>
+      </section>
+    `;
 };
 
 const renderError = function () {
   if (store.error) {
     const el = generateError(store.error);
     $('.error-container').html(el);
-  }  else{
+  } else {
     $('.error-container').empty();
   }
 };
 
 const handleCloseError = function () {
-  $('.error-container').on('click','#cancel-error',() => {
+  $('.error-container').on('click', '#cancel-error', () => {
     store.setError(null);
     renderError();
   });
@@ -62,25 +63,26 @@ const render = function () {
   if (store.hideCheckedItems) {
     items = items.filter(item => !item.checked);
   }
+
   const shoppingListItemsString = generateShoppingItemsString(items);
   $('.js-shopping-list').html(shoppingListItemsString);
 };
 
 const handleNewItemSubmit = function () {
-  $('#js-shopping-list').submit(function (event) {
+  $('#js-shopping-list-form').submit(function (event) {
     event.preventDefault();
     const newItemName = $('.js-shopping-list-entry').val();
     $('.js-shopping-list-entry').val('');
     api.createItem(newItemName)
-    //.then((newItem) => res.json())
-    .then((newItem) => {
-      store.addItem(newItem);
-      render();
-    })
-    .catch((error) => {
-      store.setError(error.message);
-      renderError();
-    });
+      .then((newItem) => {
+        store.addItem(newItem);
+        render();
+      })
+      .catch((error) => {
+        store.setError(error.message);
+        renderError();
+      });
+  });
 };
 
 const getItemIdFromElement = function (item) {
@@ -93,7 +95,6 @@ const handleDeleteItemClicked = function () {
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
     const id = getItemIdFromElement(event.currentTarget);
     api.deleteItem(id)
-      //.then(res=>res.json())
       .then(() => {
         store.findAndDelete(id);
         render();
@@ -111,16 +112,17 @@ const handleEditShoppingItemSubmit = function () {
     event.preventDefault();
     const id = getItemIdFromElement(event.currentTarget);
     const itemName = $(event.currentTarget).find('.shopping-item').val();
-    api.updateItem(id,{name:itemName})
-      .then(()=>{
-        store.findAndUpdate(id,{name:itemName});
+
+    api.updateItem(id, { name: itemName })
+      .then(() => {
+        store.findAndUpdate(id, { name: itemName });
+        render();
+      })
+      .catch((error) => {
+        console.log(error);
+        store.setError(error.message);
+        renderError();
       });
-    render();
-  })
-  .catch((error) => {
-    console.log(error);
-    store.setError(error.message);
-    renderError();
   });
 };
 
@@ -128,9 +130,9 @@ const handleItemCheckClicked = function () {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     const id = getItemIdFromElement(event.currentTarget);
     const item = store.findById(id);
-    api.updateItem(id,{checked: !item.checked})
+    api.updateItem(id, { checked: !item.checked })
       .then(() => {
-        store.findAndUpdate(id,{checked: !item.checked});
+        store.findAndUpdate(id, { checked: !item.checked });
         render();
       })
       .catch((error) => {

@@ -1,16 +1,19 @@
-const BASE_URL = 'https://thinkful-list-api.herokuapp.com/elias';
-/*
-* @param {string} URL
-* @param {object} options
-* @returns {Promise} 
-*/
+const BASE_URL = 'https://thinkful-list-api.herokuapp.com/ei-student';
+
+/**
+ * listApiFetch - Wrapper function for native `fetch` to standardize error handling. 
+ * @param {string} url 
+ * @param {object} options 
+ * @returns {Promise} 
+ */
 
 const listApiFetch = function (...args) {
+  // setup var in scope outside of promise chain
   let error;
   return fetch(...args)
     .then(res => {
       if (!res.ok) {
-        error = {code: res.status};
+        error = { code: res.status };
         if (!res.headers.get('content-type').includes('json')) {
           error.message = res.statusText;
           return Promise.reject(error);
@@ -26,17 +29,18 @@ const listApiFetch = function (...args) {
       return data;
     });
 };
+
 const getItems = function () {
   return listApiFetch(`${BASE_URL}/items`);
 };
 
-const createItem = function(name) {
-  const newItem = JSON.stringify({name});
+const createItem = function (name) {
+  const newItem = JSON.stringify({ name });
   return listApiFetch(`${BASE_URL}/items`, {
-    method: 'POST', 
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json'
-    }, 
+    },
     body: newItem
   });
 };
@@ -46,18 +50,17 @@ const updateItem = function (id, updateData) {
   return listApiFetch(`${BASE_URL}/items/${id}`, {
     method: 'PATCH',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: newData
   });
 };
 
 const deleteItem = function (id) {
-  return listApiFetch(`${BASE_URL}/items/${id}`,{
+  return listApiFetch(BASE_URL + '/items/' + id, {
     method: 'DELETE'
   });
 };
-
 
 export default {
   getItems,
